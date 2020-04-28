@@ -3,13 +3,16 @@ import React, { useState, useEffect } from "react";
 function Title() {
   const [title, setTitle] = useState();
   // componentDidMount
+  // useEffect(() => {
+  //   fetch("/district")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Title: " + data.district);
+  //       setTitle(data.district);
+  //     });
+  // }, []);
   useEffect(() => {
-    fetch("/district")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Title: " + data.district);
-        setTitle(data.district);
-      });
+    setTitle("Tây Hồ");
   }, []);
 
   return <div>{title}</div>;
