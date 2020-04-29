@@ -1,13 +1,13 @@
 import React from "react";
 import "./App.css";
 import Title from "./Title.js";
-import Upload from "./Upload.js";
+import ImageUpload from "./ImageUpload.js";
 
 function App() {
   return (
     <div className="App">
       <Title />
-      <Upload />
+      <ImageUpload />
     </div>
   );
 }
