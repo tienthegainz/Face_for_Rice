@@ -1,143 +1,121 @@
 import React from "react";
-import { Menu, Select, Button, Upload, message } from "antd";
 import {
-  DownOutlined,
-  UploadOutlined,
-  LoadingOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+  Form,
+  Select,
+  Button,
+} from 'antd';
+import { UploadOutlined, InboxOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import "./ImageUpload.css";
 
-function getBase64(img, callback) {
-  const reader = new FileReader();
-  reader.addEventListener("load", () => callback(reader.result));
-  reader.readAsDataURL(img);
-}
-
-function beforeUpload(file) {
-  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-  if (!isJpgOrPng) {
-    message.error("You can only upload JPG/PNG file!");
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error("Image must smaller than 2MB!");
-  }
-  return isJpgOrPng && isLt2M;
-}
-
-const { Option } = Select;
+const axios = require('axios');
 
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
+    this.formItemLayout = {
+      labelCol: {
+        span: 6,
+      },
+      wrapperCol: {
+        span: 14,
+      },
+    };
     this.state = {
       image: {
-        loading: false,
+        url: null,
+        file: null,
       },
-      ward: null,
+      wards: [],
     };
-    this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange = (info) => {
-    if (info.file.status === "uploading") {
-      this.setState({ loading: true });
-      return;
-    }
-    if (info.file.status === "done") {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (imageUrl) =>
-        this.setState({
-          image: { imageUrl, loading: false },
-        })
-      );
-    }
-  };
-
-  handleUpload() {
-    // const formData = new FormData();
-    // formData.append(
-    //   "myFile",
-    //   this.state.selectedFile,
-    //   this.state.selectedFile.name
-    // );
-    console.log("Upload file to server");
+  componentDidMount() {
+    axios.get("/wards")
+      .then((response) => response.data)
+      .then((json_data) => this.setState({ wards: json_data.wards }));
   }
 
-  changeWard(cward) {
-    console.log("Change to: " + cward);
-    this.setState({ ward: cward });
-  }
-
-  renderWard() {
-    let data = [
-      "Bưởi",
-      "Nhật Tân",
-      "Phú Thượng",
-      "Quảng An",
-      "Thụy Khuê",
-      "Tú Liên",
-      "Xuân La",
-      "Yên Phụ",
-    ];
+  renderWardOpt() {
+    const { Option } = Select;
+    let data = this.state.wards;
     let wards = data.map((item, idx) => (
-      <Option value={idx} onClick={() => this.changeWard(item)}>
+      <Option value={item}>
         {item}
       </Option>
     ));
     return wards;
   }
 
+  onFinish = values => {
+    let image = this.state.image.file;
+    let ward = values.ward;
+    const config = {
+      headers: { "content-type": "multipart/form-data" }
+    }
+    var formData = new FormData();
+    formData.append("ward", ward);
+    formData.append("image", image);
+    axios
+      .post("/face", formData, config)
+      .then(res => {
+        this.props.returnResult(res);
+      })
+      .catch(err => console.warn(err));
+  };
+
+  handleImage = (event) => {
+    this.setState({
+      image: {
+        url: URL.createObjectURL(event.target.files[0]),
+        file: event.target.files[0],
+      }
+    });
+    // console.log("URL: ", URL.createObjectURL(event.target.files[0]));
+  }
+
+
   render() {
-    const uploadButton = (
-      <div>
-        {this.state.image.loading ? <LoadingOutlined /> : <PlusOutlined />}
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
-    const { imageUrl } = this.state.image;
-    const wards = this.renderWard();
+    const wards = this.renderWardOpt();
     return (
-      <div>
-        <Upload
-          name="avatar"
-          listType="picture-card"
-          className="avatar-uploader"
-          showUploadList={false}
-          action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-          beforeUpload={beforeUpload}
-          onChange={this.handleChange}
+      <Form
+        name="validate_other"
+        {...this.formItemLayout}
+        onFinish={this.onFinish}
+      >
+        <Form.Item
+          name="ward"
+          label="Phường"
+          hasFeedback
+          rules={[
+            {
+              required: true,
+              message: "Xin hãy chọn phường của công dân",
+            },
+          ]}
         >
-          {imageUrl ? (
-            <img src={imageUrl} alt="avatar" style={{ width: "100%" }} />
-          ) : (
-            uploadButton
-          )}
-        </Upload>
-        {/* <img src={this.state.url} /> <br />
-        <input type="file" onChange={this.handleChange} /> <br /> */}
-        <Select
-          showSearch
-          style={{ width: 200 }}
-          placeholder="Chọn phường"
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-          }
+          <Select placeholder="Chọn phường">
+            {/* TODO: make gen function */}
+            {wards}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="image"
+          label="Ảnh"
         >
-          {wards}
-        </Select>
-        <br />
-        <Button
-          type="primary"
-          shape="round"
-          icon={<UploadOutlined />}
-          size="large"
-          onClick={this.handleUpload}
-        >
-          Tải lên
-        </Button>
-      </div>
+          <input type="file" onChange={this.handleImage} /> <br />
+          <img className="Image" src={this.state.image.url} height="400" width="400" />
+        </Form.Item>
+        <Form.Item
+          wrapperCol={{
+            span: 12,
+            offset: 6,
+          }}
+        > <br />
+          <Button type="primary" htmlType="submit">
+            Submit
+            </Button>
+        </Form.Item>
+      </Form>
     );
   }
 }
