@@ -1,13 +1,31 @@
-version: "3"
+version: '3'
 
+networks: 
+  app-networks:
+    driver: bridge
 services:
-  frontend:
-    container_name: Ffr_UI
+  react:
+    container_name: FaceForRice-react
     build:
-      context: .
+      context: frontend/
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./frontend:/app/frontend
     ports:
-      - "3000:3000"
+      - '3000:3000'
+    networks:
+      - app-networks
+    tty: true
+  flask:
+    container_name: FaceForRice-flask
+    build:
+      context: backend/
+      dockerfile: Dockerfile
+    volumes:
+      # Sync here
+      - ./backend:/app/backend
+    ports:
+      - '3500:3500'
+    networks:
+      - app-networks
     tty: true
