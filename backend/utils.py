@@ -10,6 +10,7 @@ def init_folder(root, wards):
     today = date.today()
     # dd/mm/YY
     d1 = today.strftime("%d-%m-%Y")
+    os.makedirs(root, exist_ok=True)
     new_root = os.path.join(root, d1)
     os.makedirs(new_root, exist_ok=True)
     ward_path = [os.path.join(new_root, ward) for ward in wards]

@@ -114,4 +114,4 @@ def get_district():
 
 if __name__ == "__main__":
     init()
-    app.run(debug=True, port=3500)
+    app.run(host='0.0.0.0', debug=True, port=3500)
