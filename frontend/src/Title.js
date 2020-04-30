@@ -12,7 +12,7 @@ function Title() {
       });
   }, []);
 
-  return <div>{title}</div>;
+  return <div><h1>{title}</h1></div>;
 }
 
 export default Title;

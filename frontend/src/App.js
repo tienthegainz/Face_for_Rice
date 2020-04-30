@@ -17,7 +17,7 @@ class App extends React.Component {
     this.setState({
       permission: data.permission,
     });
-    console.log(this.state.permission);
+    console.log(res);
   }
 
 

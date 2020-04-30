@@ -19,7 +19,7 @@ function Result(props) {
 
 
     return (<div>
-        {permission}
+        <h2>{permission}</h2>
     </div>);
 }
 
