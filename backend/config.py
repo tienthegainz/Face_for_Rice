@@ -1,6 +1,6 @@
 # Face
 detect_config = {'image_size': 160, 'keep_all': False}
-search_config = {'threshold': 0.5, 'dim': 512, 'threshold': 1, 'k': 1}
+search_config = {'threshold': 0.5, 'dim': 512, 'threshold': 0.7}
 
 
 # Geometry

@@ -12,6 +12,7 @@ from PIL import Image
 from torchvision.transforms import ToTensor, ToPILImage
 import random
 import string
+import base64
 
 # initialize our Flask application
 app = Flask(__name__)
@@ -78,7 +79,9 @@ def analyze_face():
         face = fd.extract_face(image, false_path)
         s_idx = fs.query_faces(face)
 
-        if not s_idx:
+        print('\nQuery result: {}\n')
+
+        if s_idx is None:
             data['permission'] = True
             data['success'] = True
             face = np.expand_dims(face, axis=0)
@@ -94,9 +97,6 @@ def analyze_face():
         else:
             data['permission'] = False
             data['success'] = True
-            # TODO: Send back image data
-            data['duplicate'] = img_path_map[s_idx[0]]
-            print(s_idx)
             print('Saved ', false_path)
 
     return jsonify(data)

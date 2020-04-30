@@ -3,7 +3,7 @@ import numpy as np
 
 
 class FaceSearcher(object):
-    def __init__(self, dim=512, space='l2', threshold=0.5, k=1):
+    def __init__(self, dim=512, space='l2', threshold=0.5):
         """
             Args:
                 dim: face embedding feature length
@@ -13,7 +13,7 @@ class FaceSearcher(object):
         self.p = hnswlib.Index(space=space, dim=dim)
         self.p.init_index(max_elements=1000, ef_construction=200, M=48)
         self.p.set_ef(20)
-        self.k = k
+        self.k = 1
         self.threshold = threshold
 
     def add_faces(self, data, index):
@@ -31,9 +31,11 @@ class FaceSearcher(object):
     def query_faces(self, data):
         try:
             index, distance = self.p.knn_query(data, k=self.k)
-            # print(index, ' --> ', distance)
             # Filter result
-            return index[distance < self.threshold]
+            index = np.squeeze(index)
+            distance = np.squeeze(distance)
+            print('Index: ', index, '\nDistance: ', distance)
+            return index if distance < self.threshold else None
         except Exception as err:
             # TODO: Logging here
             print(err)
